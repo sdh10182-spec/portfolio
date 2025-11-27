@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Designer Portfolio</title>
+
+<style>
+/* -------------------- 전체 스타일 -------------------- */
+body {
+    margin: 0;
+    font-family: "Pretendard", sans-serif;
+    background: #fff8f0;
+    display: flex;
+    color: #4a3b2f;
+}
+
+/* -------------------- 좌측 사이드바 -------------------- */
+.sidebar {
+    width: 220px;
+    background: #ffb678;
+    padding: 20px;
+    height: 100vh;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.menu-title {
+    font-weight: bold;
+    margin: 15px 0 10px;
+}
+
+.menu-item {
+    padding: 10px;
+    background: rgba(255,255,255,0.45);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.menu-item:hover {
+    background: rgba(255,255,255,0.7);
+}
+
+/* 관리자 모드 버튼 */
+.lock-btn {
+    margin-top: auto;
+    padding: 10px;
+    background: rgba(255,255,255,0.5);
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* -------------------- 메인 콘텐츠 -------------------- */
+.content {
+    flex: 1;
+    padding: 40px;
+}
+
+.section-title {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
+/* -------------------- 3열 포트폴리오 그리드 -------------------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: .2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* -------------------- 작품 상세 모달 -------------------- */
+.modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal {
+    background: #fff;
+    width: 420px;
+    padding: 25px;
+    border-radius: 12px;
+}
+
+.modal img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+/* -------------------- 관리자 패널 -------------------- */
+#admin-panel {
+    margin-top: 30px;
+    padding: 20px;
+    background: #ffe8d4;
+    border-radius: 12px;
+    display: none;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #d1b8a3;
+}
+
+button {
+    padding: 10px;
+    background: #ff9d56;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+button:hover {
+    background: #ff7f22;
+}
+
+</style>
+</head>
+<body>
+
+<!-- -------------------- 좌측 사이드바 -------------------- -->
+<div class="sidebar">
+    <div class="logo">Designer Portfolio</div>
+
+    <div class="menu-title">카테고리</div>
+    <div id="category-list">
+        <div class="menu-item" data-cat="all" onclick="filterCategory('all')">전체</div>
+        <div class="menu-item" data-cat="interior" onclick="filterCategory('interior')">인테리어</div>
+        <div class="menu-item" data-cat="architecture" onclick="filterCategory('architecture')">건축</div>
+        <div class="menu-item" data-cat="exhibition" onclick="filterCategory('exhibition')">전시</div>
+    </div>
+
+    <div class="menu-item" onclick="showProfile()">디자이너 프로필</div>
+
+    <div class="lock-btn" onclick="unlockAdmin()">🔑 관리자 모드</div>
+</div>
+
+<!-- -------------------- 메인 콘텐츠 -------------------- -->
+<div class="content">
+    <h1 id="main-title" class="section-title">포트폴리오</h1>
+
+    <div id="portfolio-area">
+        <div class="grid" id="portfolio-grid">
+            <!-- 초기 샘플 카드 -->
+            <div class="card" data-cat="interior" onclick="openModal(0)">
+                <img src="https://picsum.photos/400/300?random=11">
+                <p>인테리어 프로젝트 01</p>
+            </div>
+            <div class="card" data-cat="architecture" onclick="openModal(1)">
+                <img src="https://picsum.photos/400/300?random=12">
+                <p>건축 프로젝트 01</p>
+            </div>
+            <div class="card" data-cat="exhibition" onclick="openModal(2)">
+                <img src="https://picsum.photos/400/300?random=13">
+                <p>전시 프로젝트 01</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- -------------------- 관리자 패널 -------------------- -->
+    <div id="admin-panel">
+        <h3>🛠 관리자 모드</h3>
+
+        <h4>작품 추가</h4>
+        <input type="file" id="upload-img">
+        <input type="text" id="upload-title" placeholder="작품 제목 입력">
+        <textarea id="upload-desc" placeholder="작품 설명" rows="3"></textarea>
+
+        <select id="upload-category">
+            <option value="interior">인테리어</option>
+            <option value="architecture">건축</option>
+            <option value="exhibition">전시</option>
+        </select>
+
+        <button onclick="addWork()">작품 추가하기</button>
+
+        <hr style="margin: 20px 0">
+
+        <h4>카테고리 추가</h4>
+        <input type="text" id="new-category-input" placeholder="카테고리 이름">
+        <button onclick="addCategory()">카테고리 생성</button>
+    </div>
+</div>
+
+<!-- -------------------- 작품 상세 모달 -------------------- -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+        <img id="modal-img">
+        <h3 id="modal-title"></h3>
+        <p id="modal-desc"></p>
+
+        <div id="edit-section" style="display:none;">
+            <h4>작품 수정</h4>
+            <input type="file" id="edit-img">
+            <input type="text" id="edit-title">
+            <textarea id="edit-desc" rows="3"></textarea>
+            <button onclick="saveEdit()">저장하기</button>
+            <button onclick="deleteWork()">삭제하기</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* -------------------- 데이터 저장 -------------------- */
+let works = [
+    {
+        img: "https://picsum.photos/400/300?random=11",
+        title: "인테리어 프로젝트 01",
+        desc: "자연광을 활용한 Zen 인테리어 디자인",
+        cat: "interior"
+    },
+    {
+        img: "https://picsum.photos/400/300?random=12",
+        title: "건축 프로젝트 01",
+        desc: "곡선미를 강조한 건축 디자인",
+        cat: "architecture"
+    },
+    {
+        img: "https://picsum.photos/400/300?random=13",
+        title: "전시 프로젝트 01",
+        desc: "따뜻한 빛과 공간 대비를 활용한 전시 연출",
+        cat: "exhibition"
+    }
+];
+
+let currentIndex = null;
+let adminMode = false;
+
+/* -------------------- 작품 필터 -------------------- */
+function filterCategory(cat) {
+    document.getElementById("main-title").innerText = 
+        cat === "all" ? "전체 포트폴리오" : cat + " 카테고리";
+
+    let cards = document.querySelectorAll(".card");
+    cards.forEach(c => {
+        c.style.display = (cat === "all" || c.dataset.cat === cat)
+            ? "block" : "none";
+    });
+}
+
+/* -------------------- 디자이너 프로필 -------------------- */
+function showProfile() {
+    document.getElementById("portfolio-area").innerHTML = `
+        <h2>디자이너 프로필</h2>
+        <p>공간을 통해 감성과 흐름을 디자인하는 공간 디자이너입니다.</p>
+        <p>경력: 8년</p>
+        <p>디자인 철학: 여백과 자연을 기반으로 한 Zen Space Design</p>
+    `;
+}
+
+/* -------------------- 관리자 모드 -------------------- */
+function unlockAdmin() {
+    let pw = prompt("비밀번호를 입력하세요 (1234)");
+    if (pw === "1234") {
+        adminMode = true;
+        alert("관리자 모드 활성화!");
+        document.getElementById("admin-panel").style.display = "block";
+    } else {
+        alert("비밀번호가 틀렸습니다.");
+    }
+}
+
+/* -------------------- 작품 상세 모달 -------------------- */
+function openModal(index) {
+    currentIndex = index;
+
+    let w = works[index];
+    document.getElementById("modal-img").src = w.img;
+    document.getElementById("modal-title").innerText = w.title;
+    document.getElementById("modal-desc").innerText = w.desc;
+
+    document.getElementById("modal-bg").style.display = "flex";
+
+    // 관리자 모드일 때만 수정 기능 띄움
+    document.getElementById("edit-section").style.display = adminMode ? "block" : "none";
+
+    if (adminMode) {
+        document.getElementById("edit-title").value = w.title;
+        document.getElementById("edit-desc").value = w.desc;
+    }
+}
+
+function closeModal(e) {
+    if (e.target.id === "modal-bg") {
+        document.getElementById("modal-bg").style.display = "none";
+    }
+}
+
+/* -------------------- 작품 추가 -------------------- */
+function addWork() {
+    let imgFile = document.getElementById("upload-img").files[0];
+    let title = document.getElementById("upload-title").value;
+    let desc = document.getElementById("upload-desc").value;
+    let category = document.getElementById("upload-category").value;
+
+    if (!imgFile) return alert("이미지를 업로드하세요!");
+
+    let imgURL = URL.createObjectURL(imgFile);
+
+    works.push({ img: imgURL, title, desc, cat: category });
+    renderPortfolio();
+    alert("작품이 추가되었습니다!");
+}
+
+/* -------------------- 작품 삭제 -------------------- */
+function deleteWork() {
+    if (confirm("정말 삭제하시겠습니까?")) {
+        works.splice(currentIndex, 1);
+        renderPortfolio();
+        document.getElementById("modal-bg").style.display = "none";
+    }
+}
+
+/* -------------------- 작품 수정 -------------------- */
+function saveEdit() {
+    let w = works[currentIndex];
+
+    let title = document.getElementById("edit-title").value;
+    let desc = document.getElementById("edit-desc").value;
+
+    let imgFile = document.getElementById("edit-img").files[0];
+    if (imgFile) {
+        w.img = URL.createObjectURL(imgFile);
+    }
+
+    w.title = title;
+    w.desc = desc;
+
+    renderPortfolio();
+    alert("수정되었습니다!");
+}
+
+/* -------------------- 카테고리 추가 -------------------- */
+function addCategory() {
+    let name = document.getElementById("new-category-input").value;
+    if (!name) return;
+
+    let list = document.getElementById("category-list");
+    let item = document.createElement("div");
+    item.className = "menu-item";
+    item.innerText = name;
+    item.onclick = () => filterCategory(name);
+    item.dataset.cat = name;
+
+    list.appendChild(item);
+    document.getElementById("new-category-input").value = "";
+}
+
+/* -------------------- 포트폴리오 렌더링 -------------------- */
+function renderPortfolio() {
+    let grid = document.getElementById("portfolio-grid");
+    grid.innerHTML = "";
+
+    works.forEach((w, i) => {
+        grid.innerHTML += `
+            <div class="card" data-cat="${w.cat}" onclick="openModal(${i})">
+                <img src="${w.img}">
+                <p>${w.title}</p>
+            </div>
+        `;
+    });
+}
+</script>
+</body>
+</html>
